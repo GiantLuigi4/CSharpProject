@@ -2,8 +2,8 @@
 using tfc.program.util.window;
 using tfc.program.util.gl;
 using tfc.program.util;
-using Silk.NET.OpenGL;
 using tfc.program.util.rendering;
+using OpenGL;
 
 // https://coffeebeancode.gitbook.io/lwjgl-game-design/tutorials/chapter-1-drawing-your-first-triangle
 // https://learnopengl.com/Getting-started/Shaders
@@ -35,7 +35,10 @@ namespace tfc.program {
                 0.5f, -0.5f, 0f,
                 0f,0.5f,0f};
             int[] indices = { 0, 1, 2 };
-            Console.WriteLine("|Creating VAO");
+            VertexBufferObject vboVertices = new VertexBufferObject(mainWindow.getContext());
+            vboVertices.uploadVertices(vertices, 0, 3);
+
+            /*Console.WriteLine("|Creating VAO");
             VertexArrayObject vao = new VertexArrayObject(mainWindow.getContext());
             vao.bind();
             Console.WriteLine("|-|Creating VBOs");
@@ -46,13 +49,13 @@ namespace tfc.program {
             vboIndices.uploadIndicies(indices);
             mainWindow.getContext().enableVertexAttribArray(0);
             vao.countIndices(vboIndices);
-            vao.unbind();
+            vao.unbind();*/
 
-			Console.WriteLine("|Creating Shader Program");
+            Console.WriteLine("|Creating Shader Program");
             Console.WriteLine("|-|Creating shaders");
             Console.WriteLine("|-|-|Vertex Shader");
             // TODO: asset pack type thing
-            util.rendering.Shader vertexShader = new util.rendering.Shader(GLEnum.VertexShader,
+            util.rendering.Shader vertexShader = new util.rendering.Shader(ShaderType.VertexShader,
                 "#version 330 core\n" +
                 "in vec3 pos;\n" +
                 "void main() {\n" +
@@ -61,7 +64,7 @@ namespace tfc.program {
                 mainWindow.getContext()
             );
             Console.WriteLine("|-|-|Fragment Shader");
-            util.rendering.Shader fragmentShader = new util.rendering.Shader(GLEnum.FragmentShader,
+            util.rendering.Shader fragmentShader = new util.rendering.Shader(ShaderType.FragmentShader,
                 "#version 330 core\n" +
                 "out vec4 FragColor;\n" +
                 "void main() {\n" +
@@ -85,20 +88,32 @@ namespace tfc.program {
                     if (!window.isOpen()) window.hide();
                     window.grabGLContext();
 
-                    OpenGL GL = window.getContext();
+                    OpenGLW GL = window.getContext();
                     GL.clearColor(cR, 0.0f, b, 0.0f);
-                    GL.clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
+                    GL.clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
                     if (b == 0) {
                         b = 1;
 
-                        program.use();
+                        GL.begin(PrimitiveType.Triangles);
+                        GL.vertexPosition(0, 0, 0);
+                        GL.vertexPosition(1, 0, 0);
+                        GL.vertexPosition(1, 1, 0);
+                        GL.end();
+
+                        /*program.use();
                         vao.bind();
-                        GL.bindBuffer(GLEnum.ArrayBuffer, vboVertices.getId());
-                        GL.drawArrays(GLEnum.Triangles, 0, 3);
-                        GL.bindBuffer(GLEnum.ArrayBuffer, 0);
+                        GL.bindBuffer(BufferTarget.ArrayBuffer, vboVertices.getId());
+                        GL.drawArrays(PrimitiveType.Triangles, 0, 3);
+                        GL.bindBuffer(BufferTarget.ArrayBuffer, 0);
                         vao.unbind();
-                        program.end();
+                        program.end();*/
+                    } else {
+                        GL.begin(PrimitiveType.Triangles);
+                        GL.vertexPosition(-1, -1, 0);
+                        GL.vertexPosition(0, -1, 0);
+                        GL.vertexPosition(0, 0, 0);
+                        GL.end();
                     }
 
 //                    window.getBounds();
@@ -113,10 +128,10 @@ namespace tfc.program {
                 window.close();
             }
 
-            Console.WriteLine("|-|Disposing lasting vertex objects");
+            /*Console.WriteLine("|-|Disposing lasting vertex objects");
             vboVertices.Dispose();
             vboIndices.Dispose();
-            vao.Dispose();
+            vao.Dispose();*/
 
             Console.WriteLine("|-|Deleting Shaders");
             vertexShader.delete();

@@ -1,122 +1,149 @@
-﻿using Silk.NET.OpenGL;
-using Silk.NET.Core.Contexts;
-using Silk.NET.Windowing;
+﻿// using Silk.NET.OpenGL;
+// using Silk.NET.Core.Contexts;
+// using Silk.NET.Windowing;
 using System;
+using System.Text;
+using glfw3;
+using OpenGL;
 
 namespace tfc.program.util.gl {
-    sealed class OpenGL {
-        GL gl;
-
-        public unsafe OpenGL(IGLContext window) {
-            gl = GL.GetApi(window);
-        }
-
-        public unsafe OpenGL(IWindow window) {
-            gl = GL.GetApi(window);
+    sealed class OpenGLW {
+        public OpenGLW(GLFWwindow window) {
         }
 
         public void clearColor(float r, float g, float b, float a) {
-            gl.ClearColor(r, g, b, a);
+            Gl.ClearColor(r, g, b, a);
         }
 
-        public void clear(uint parameters) {
-            gl.Clear(parameters);
+        public void clear(ClearBufferMask parameters) {
+            Gl.Clear(parameters);
         }
 
         public uint genVertexArrays() {
-            uint[] id = new uint[1];
-            gl.GenVertexArrays(1, id);
-            return id[0];
+            /*uint[] id = new uint[1];
+            Gl.GenVertexArrays(id);
+            return id[0];*/
+            return Gl.GenVertexArray();
         }
 
         public uint genBuffers() {
-            return gl.GenBuffer();
+            return Gl.GenBuffer();
         }
 
         public void deleteVAO(uint vaoid) {
-            gl.DeleteVertexArray(vaoid);
+            Gl.DeleteVertexArrays(vaoid);
         }
 
-        public void bindBuffer(GLEnum target, uint id) {
-            gl.BindBuffer(target, id);
+        public void bindBuffer(BufferTarget target, uint id) {
+            Gl.BindBuffer(target, id);
         }
 
-        public unsafe void bufferData<T>(GLEnum target, T[] data, GLEnum usage) where T : unmanaged {
+        public unsafe void bufferData<T>(BufferTarget target, T[] data, BufferUsage usage) where T : unmanaged {
             fixed (void* v = &data[0]) {
-                gl.BufferData(target, (nuint)(data.Length * sizeof(T)), v, usage);
+                Gl.BufferData(target, (uint)(data.Length * sizeof(T)), new IntPtr(v), usage);
             }
         }
 
-        public void vertexAttributePointer(uint attribute, int dimensions, GLEnum type, bool normalized, uint stride, uint pointer) {
-            gl.VertexAttribPointer(attribute, dimensions, type, normalized, stride, pointer);
+        public void vertexAttributePointer(uint attribute, int dimensions, VertexAttribType type, bool normalized, int stride, int pointer) {
+            Gl.VertexAttribPointer(attribute, dimensions, type, normalized, stride, pointer);
         }
 
         public void bindVertexArray(uint id) {
-            gl.BindVertexArray(id);
+            Gl.BindVertexArray(id);
         }
 
         public void enableVertexAttribArray(uint array) {
-            gl.EnableVertexAttribArray(array);
+            Gl.EnableVertexAttribArray(array);
         }
 
         public void disableVertexAttribArray(uint array) {
-            gl.EnableVertexAttribArray(array);
+            Gl.EnableVertexAttribArray(array);
         }
 
-        public void drawElements(GLEnum mode, uint count, GLEnum type, in int indices) {
-            gl.DrawElements(mode, count, type, indices);
+        public void drawElements(PrimitiveType mode, int count, DrawElementsType type, in int indices) {
+            Gl.DrawElements(mode, count, type, indices);
         }
 
-        public void drawArrays(GLEnum mode, int first, uint count) {
-            gl.DrawArrays(mode, first, count);
+        public void drawArrays(PrimitiveType mode, int first, int count) {
+            Gl.DrawArrays(mode, first, count);
         }
 
-        public uint createShader(GLEnum type) {
-            return gl.CreateShader(type);
+        public uint createShader(ShaderType type) {
+            return Gl.CreateShader(type);
         }
 
         public void shaderSource(uint shader, string src) {
-            gl.ShaderSource(shader, src);
+            Gl.ShaderSource(shader, new string[] { src }, new int[] { src.Length });
         }
 
         public void compileShader(uint shader) {
-            gl.CompileShader(shader);
+            Gl.CompileShader(shader);
+        }
+
+        public void getShaderInfoLog(uint shader, int maxLength, out int length, StringBuilder text) {
+            Gl.GetShaderInfoLog(shader, maxLength, out length, text);
         }
 
         public string getShaderInfoLog(uint shader) {
-            return gl.GetShaderInfoLog(shader);
+            StringBuilder builder = new StringBuilder();
+            int len = 0;
+            Gl.GetShaderInfoLog(shader, 1000, out len, builder);
+            return builder.ToString(0, len);
         }
 
         public void deleteShader(uint id) {
-            gl.DeleteShader(id);
+            Gl.DeleteShader(id);
         }
 
         public void attachShader(uint program, uint shader) {
-            gl.AttachShader(program, shader);
+            Gl.AttachShader(program, shader);
         }
 
         public uint createProgram() {
-            return gl.CreateProgram();
+            return Gl.CreateProgram();
         }
 
-        public string getProgramInfoLog(uint shader) {
-            return gl.GetProgramInfoLog(shader);
+        public void getProgramInfoLog(uint program, int maxLength, out int length, StringBuilder text) {
+            Gl.GetProgramInfoLog(program, maxLength, out length, text);
+        }
+
+        public string getProgramInfoLog(uint program) {
+            StringBuilder builder = new StringBuilder();
+            int len = 0;
+            Gl.GetProgramInfoLog(program, 1000, out len, builder);
+            return builder.ToString(0, len);
         }
 
         public void linkProgram(uint id) {
-            gl.LinkProgram(id);
+            Gl.LinkProgram(id);
         }
 
         public void useProgram(uint id) {
-            gl.UseProgram(id);
+            Gl.UseProgram(id);
         }
 
         public void deleteProgram(uint id) {
-            gl.DeleteProgram(id);
+            Gl.DeleteProgram(id);
         }
 
         public void bindAttribute(uint id, uint index, string name) {
-            gl.BindAttribLocation(id, index, name);
+            Gl.BindAttribLocation(id, index, name);
+        }
+
+        public void begin(PrimitiveType mode) {
+            Gl.Begin(mode);
+        }
+
+        public void end() {
+            Gl.End();
+        }
+
+        public void vertexPosition(double x, double y, double z) {
+            Gl.Vertex3(x, y, z);
+        }
+
+        public void vertexPosition(double x, double y) {
+            Gl.Vertex2(x, y);
         }
     }
 }

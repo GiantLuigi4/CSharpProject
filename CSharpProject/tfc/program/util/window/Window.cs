@@ -1,23 +1,28 @@
 using tfc.program.util.gl;
-using Silk.NET.GLFW;
+// using Silk.NET.GLFW;
 using System;
-using Silk.NET.Windowing;
+// using Silk.NET.Windowing;
+using glfw3;
 
 namespace tfc.program.util.window {
 	unsafe class GLWindow {
-		private WindowHandle* handle;
+//		private WindowHandle* handle;
+		private GLFWwindow handle;
 		private bool visible = false;
 		public bool closed = false;
-		private OpenGL gl;
+		private OpenGLW gl;
 
 		public unsafe GLWindow() {
-			/*
 			GLFW.defaultWindowHints();
-			GLFW.windowHint(WindowHintBool.Visible, false);
-			GLFW.windowHint(WindowHintBool.Resizable, true);
+			GLFW.windowHint(0x00020004, false); // visible
+			GLFW.windowHint(0x00020003, true); // resizable
 
-			WindowHandle* handlePtr = GLFW.createWindow(300, 300, "a", null, null);
-			*/
+			GLFWwindow handlePtr = GLFW.createWindow(300, 300, "a", null, null);
+			if (handlePtr == null) throw new Exception("Failed to initalize window");
+			handle = handlePtr;
+
+			gl = new OpenGLW(handle);
+			/*
 			var options = WindowOptions.Default;
 			options.Size = new Silk.NET.Maths.Vector2D<int>(300, 300);
 			options.Title = " ";
@@ -31,6 +36,7 @@ namespace tfc.program.util.window {
 				hide();
 			};
 			window.Initialize();
+			*/
 		}
 
 		public void close() { 
@@ -68,7 +74,7 @@ namespace tfc.program.util.window {
 			GLFW.makeContextCurrent(handle);
 		}
 
-		public OpenGL getContext() {
+		public OpenGLW getContext() {
 			return gl;
 		}
 
@@ -93,15 +99,15 @@ namespace tfc.program.util.window {
 			return bounds;
 		}
 
-		public void setKeyListener(GlfwCallbacks.KeyCallback listener) {
+		public void setKeyListener(GLFWkeyfun listener) {
 			GLFW.setKeyCallback(handle, listener);
 		}
 
-		public void setClickListener(GlfwCallbacks.MouseButtonCallback listener) {
+		public void setClickListener(GLFWmousebuttonfun listener) {
 			GLFW.setMouseButtonCallback(handle, listener);
 		}
 
-		public void setMouseEntryListener(GlfwCallbacks.CursorEnterCallback listener) {
+		public void setMouseEntryListener(GLFWcursorenterfun listener) {
 			GLFW.setMouseEnterCallback(handle, listener);
 		}
 	}

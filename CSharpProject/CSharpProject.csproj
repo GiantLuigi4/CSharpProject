@@ -8,12 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Silk.NET" Version="2.7.0" />
-    <PackageReference Include="Silk.NET.Core" Version="2.7.0" />
-    <PackageReference Include="Silk.NET.OpenGLes" Version="2.7.0" />
-    <PackageReference Include="Silk.NET.GLFW" Version="2.7.0" />
-    <PackageReference Include="Ultz.Bcl.Half" Version="1.0.0" />
-    <PackageReference Include="Silk.NET.Windowing" Version="2.7.0" />
-    <PackageReference Include="Silk.NET.Windowing.Sdl" Version="2.7.0" />
+    <PackageReference Include="OpenGL.Net" Version="0.8.4" />
+    <PackageReference Include="GLFW.NET" Version="0.9.7.1" />
+    <PackageReference Include="Ultz.Native.GLFW" Version="3.3.3.1" />
   </ItemGroup>
 </Project>

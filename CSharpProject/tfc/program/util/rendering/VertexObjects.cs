@@ -1,21 +1,21 @@
 using tfc.program.util.gl;
 using System;
-using Silk.NET.OpenGL;
+using OpenGL;
 
 // https://coffeebeancode.gitbook.io/lwjgl-game-design/tutorials/chapter-1-drawing-your-first-triangle
 namespace tfc.program.util.rendering {
 	class VertexArrayObject : IDisposable {
 		private uint id;
 		private int vertices;
-		private OpenGL graphicsLibrary;
+		private OpenGLW graphicsLibrary;
 
-		public VertexArrayObject(OpenGL graphicsLibrary) {
+		public VertexArrayObject(OpenGLW graphicsLibrary) {
 			this.graphicsLibrary = graphicsLibrary;
 			id = graphicsLibrary.genVertexArrays();
 			GC.SuppressFinalize(this);
 		}
 
-		public VertexArrayObject(OpenGL graphicsLibrary, uint id, int vertices) {
+		public VertexArrayObject(OpenGLW graphicsLibrary, uint id, int vertices) {
 			this.graphicsLibrary = graphicsLibrary;
 			this.id = id;
 			this.vertices = vertices;
@@ -53,10 +53,10 @@ namespace tfc.program.util.rendering {
 
 	class VertexBufferObject : IDisposable { 
 		private uint id;
-		private OpenGL graphicsLibrary;
+		private OpenGLW graphicsLibrary;
 		private int size;
 
-		public VertexBufferObject(OpenGL GL) {
+		public VertexBufferObject(OpenGLW GL) {
 			this.graphicsLibrary = GL;
 			id = graphicsLibrary.genBuffers();
 		}
@@ -78,16 +78,16 @@ namespace tfc.program.util.rendering {
 
 		// TODO: figure out if there's an enum I can replace attribute with
 		public void uploadVertices(float[] vertices, uint attribute, int dimensions) {
-			graphicsLibrary.bindBuffer(GLEnum.ArrayBuffer, id);
-			graphicsLibrary.bufferData(GLEnum.ArrayBuffer, vertices, GLEnum.StaticDraw);
-			graphicsLibrary.vertexAttributePointer(attribute, dimensions, GLEnum.Float, false, 3 * sizeof(float), 0);
+			graphicsLibrary.bindBuffer(BufferTarget.ArrayBuffer, id);
+			graphicsLibrary.bufferData(BufferTarget.ArrayBuffer, vertices, BufferUsage.StaticDraw);
+			graphicsLibrary.vertexAttributePointer(attribute, dimensions, VertexAttribType.Float, false, 3 * sizeof(float), 0);
 //			graphicsLibrary.bindBuffer(GLEnum.ArrayBuffer, 0);
 			size = vertices.Length / dimensions;
 		}
 
 		public void uploadIndicies(int[] data) {
-			graphicsLibrary.bindBuffer(GLEnum.ElementArrayBuffer, id);
-			graphicsLibrary.bufferData(GLEnum.ElementArrayBuffer, data, GLEnum.StaticDraw);
+			graphicsLibrary.bindBuffer(BufferTarget.ElementArrayBuffer, id);
+			graphicsLibrary.bufferData(BufferTarget.ElementArrayBuffer, data, BufferUsage.StaticDraw);
 //			graphicsLibrary.bindBuffer(GLEnum.ElementArrayBuffer, 0);
 			size = data.Length;
 		}

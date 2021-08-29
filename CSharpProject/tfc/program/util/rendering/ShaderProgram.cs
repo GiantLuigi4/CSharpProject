@@ -6,10 +6,10 @@ using tfc.program.util.gl;
 
 namespace tfc.program.util.rendering {
     class ShaderProgram {
-        private OpenGL GL;
+        private OpenGLW GL;
         private uint id;
 
-        public ShaderProgram(Shader vertex, Shader fragment, OpenGL gl) {
+        public ShaderProgram(Shader vertex, Shader fragment, OpenGLW gl) {
             this.GL = gl;
             id = gl.createProgram();
             gl.attachShader(id, vertex.getID());
