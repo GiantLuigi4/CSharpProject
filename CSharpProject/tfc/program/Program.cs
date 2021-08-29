@@ -14,14 +14,15 @@ namespace tfc.program {
         static void Main(string[] args) {
             if (!GLFW.init()) throw new Exception("Failed to initalize glfw");
             GenericList<GLWindow> windows = new GenericList<GLWindow>(1);
-            Console.WriteLine("Creating main window");
+            Console.WriteLine("|Creating windows");
+            Console.WriteLine("|-|Creating main window");
             GLWindow mainWindow = new GLWindow();
             {
                 mainWindow.setTitle("Test");
                 mainWindow.show();
                 windows.add(mainWindow);
             }
-            Console.WriteLine("Creating secondary window");
+            Console.WriteLine("|-|Creating secondary window");
             {
                 GLWindow secondWindow = new GLWindow();
                 {
@@ -34,28 +35,32 @@ namespace tfc.program {
                 0.5f, -0.5f, 0f,
                 0f,0.5f,0f};
             int[] indices = { 0, 1, 2 };
-            Console.WriteLine("Creating VAO");
+            Console.WriteLine("|Creating VAO");
             VertexArrayObject vao = new VertexArrayObject(mainWindow.getContext());
             vao.bind();
-            Console.WriteLine("Creating VBOs");
+            Console.WriteLine("|-|Creating VBOs");
             VertexBufferObject vboVertices = new VertexBufferObject(mainWindow.getContext());
             VertexBufferObject vboIndices = new VertexBufferObject(mainWindow.getContext());
-            Console.WriteLine("Uploading VBOs");
+            Console.WriteLine("|-|Uploading VBOs");
             vboVertices.uploadVertices(vertices, 0, 3);
             vboIndices.uploadIndicies(indices);
+            mainWindow.getContext().enableVertexAttribArray(0);
             vao.countIndices(vboIndices);
             vao.unbind();
 
+			Console.WriteLine("|Creating Shader Program");
+            Console.WriteLine("|-|Creating shaders");
+            Console.WriteLine("|-|-|Vertex Shader");
             // TODO: asset pack type thing
-            Console.WriteLine("Creating shaders");
             util.rendering.Shader vertexShader = new util.rendering.Shader(GLEnum.VertexShader,
                 "#version 330 core\n" +
-                "layout (location = 0) in vec3 pos;\n" +
+                "in vec3 pos;\n" +
                 "void main() {\n" +
                 "   gl_Position = vec4(pos, 1.0);\n" +
-                "}\0", 
+                "}\0",
                 mainWindow.getContext()
             );
+            Console.WriteLine("|-|-|Fragment Shader");
             util.rendering.Shader fragmentShader = new util.rendering.Shader(GLEnum.FragmentShader,
                 "#version 330 core\n" +
                 "out vec4 FragColor;\n" +
@@ -64,14 +69,14 @@ namespace tfc.program {
                 "}\0", 
                 mainWindow.getContext()
             );
-
-            Console.WriteLine("Creating Shader Program");
+            Console.WriteLine("|-|Link Shaders");
             ShaderProgram program = new ShaderProgram(vertexShader, fragmentShader, mainWindow.getContext());
+            program.bindAttribute(0, "pos");
 
-            Console.WriteLine("Game Loop");
+            Console.WriteLine("|Game Loop");
             while (mainWindow.isOpen()) {
                 cR += 1f / (255f * 2f);
-                float b = 0;
+                int b = 0;
 
                 if (cR >= 1) {
                     cR = 0;
@@ -89,9 +94,9 @@ namespace tfc.program {
 
                         program.use();
                         vao.bind();
-                        GL.enableVertexAttribArray(0);
-                        GL.drawElements(GLEnum.Triangles, (uint)vao.getVertexCount(), GLEnum.Float, 0);
-                        GL.disableVertexAttribArray(0);
+                        GL.bindBuffer(GLEnum.ArrayBuffer, vboVertices.getId());
+                        GL.drawArrays(GLEnum.Triangles, 0, 3);
+                        GL.bindBuffer(GLEnum.ArrayBuffer, 0);
                         vao.unbind();
                         program.end();
                     }
@@ -102,18 +107,23 @@ namespace tfc.program {
                 }
             }
             windows.remove(mainWindow);
-            Console.WriteLine("Closing lasting windows");
+            Console.WriteLine("|Finalize");
+            Console.WriteLine("|-|Closing lasting windows");
             foreach (GLWindow window in windows) {
                 window.close();
             }
 
-            Console.WriteLine("Disposing lasting objects");
+            Console.WriteLine("|-|Disposing lasting vertex objects");
             vboVertices.Dispose();
             vboIndices.Dispose();
             vao.Dispose();
 
-            Console.WriteLine("Deleting Shaders");
+            Console.WriteLine("|-|Deleting Shaders");
             vertexShader.delete();
+            fragmentShader.delete();
+
+            Console.WriteLine("|-|Deleting Shader Program");
+            program.delete();
         }
     }
 }

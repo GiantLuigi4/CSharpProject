@@ -26,5 +26,13 @@ namespace tfc.program.util.rendering {
         public void end() {
             GL.useProgram(0);
         }
+
+        public void delete() {
+            GL.deleteProgram(id);
+        }
+
+        public void bindAttribute(uint index, string name) {
+            GL.bindAttribute(id, index, name);
+        }
     }
 }

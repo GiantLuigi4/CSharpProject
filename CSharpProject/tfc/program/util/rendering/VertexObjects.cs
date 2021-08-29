@@ -46,7 +46,7 @@ namespace tfc.program.util.rendering {
 			GC.SuppressFinalize(this);
 		}
 
-        internal void countIndices(VertexBufferObject indices) {
+        public void countIndices(VertexBufferObject indices) {
 			this.vertices = indices.getSize();
         }
     }
@@ -80,7 +80,7 @@ namespace tfc.program.util.rendering {
 		public void uploadVertices(float[] vertices, uint attribute, int dimensions) {
 			graphicsLibrary.bindBuffer(GLEnum.ArrayBuffer, id);
 			graphicsLibrary.bufferData(GLEnum.ArrayBuffer, vertices, GLEnum.StaticDraw);
-			graphicsLibrary.vertexAttributePointer(attribute, dimensions, GLEnum.Float, false, 0, 0);
+			graphicsLibrary.vertexAttributePointer(attribute, dimensions, GLEnum.Float, false, 3 * sizeof(float), 0);
 //			graphicsLibrary.bindBuffer(GLEnum.ArrayBuffer, 0);
 			size = vertices.Length / dimensions;
 		}
@@ -95,5 +95,9 @@ namespace tfc.program.util.rendering {
 		public int getSize() {
 			return size;
         }
-	}
+
+        public uint getId() {
+			return id;
+        }
+    }
 }

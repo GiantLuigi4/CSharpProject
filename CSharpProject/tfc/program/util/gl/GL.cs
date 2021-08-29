@@ -67,6 +67,10 @@ namespace tfc.program.util.gl {
             gl.DrawElements(mode, count, type, indices);
         }
 
+        public void drawArrays(GLEnum mode, int first, uint count) {
+            gl.DrawArrays(mode, first, count);
+        }
+
         public uint createShader(GLEnum type) {
             return gl.CreateShader(type);
         }
@@ -105,6 +109,14 @@ namespace tfc.program.util.gl {
 
         public void useProgram(uint id) {
             gl.UseProgram(id);
+        }
+
+        public void deleteProgram(uint id) {
+            gl.DeleteProgram(id);
+        }
+
+        public void bindAttribute(uint id, uint index, string name) {
+            gl.BindAttribLocation(id, index, name);
         }
     }
 }
