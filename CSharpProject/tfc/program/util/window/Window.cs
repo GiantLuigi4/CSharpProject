@@ -110,5 +110,9 @@ namespace tfc.program.util.window {
 		public void setMouseEntryListener(GLFWcursorenterfun listener) {
 			GLFW.setMouseEnterCallback(handle, listener);
 		}
+
+		public void setCloseListener(GLFWwindowclosefun listener) {
+			GLFW.setCloseCallback(handle, listener);
+		}
 	}
 }

@@ -85,5 +85,9 @@ namespace tfc.program.util.window {
 		public static unsafe void setMouseEnterCallback(GLFWwindow handle, GLFWcursorenterfun callback) {
 			Glfw.SetCursorEnterCallback(handle, callback);
 		}
+
+		public static unsafe void setCloseCallback(GLFWwindow handle, GLFWwindowclosefun callback) {
+			Glfw.SetWindowCloseCallback(handle, callback);
+		}
 	}
 }

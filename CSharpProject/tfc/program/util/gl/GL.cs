@@ -73,7 +73,14 @@ namespace tfc.program.util.gl {
         }
 
         public void shaderSource(uint shader, string src) {
-            Gl.ShaderSource(shader, new string[] { src }, new int[] { src.Length });
+            string[] strs = src.Split("\n");
+            Gl.ShaderSource(shader, strs);
+        }
+
+        public string getShaderSource(uint shader, int shaderLength, out int length) {
+            StringBuilder builder = new StringBuilder();
+            Gl.GetShaderSource(shader, shaderLength, out length, builder);
+            return builder.ToString(0, length);
         }
 
         public void compileShader(uint shader) {
@@ -85,10 +92,12 @@ namespace tfc.program.util.gl {
         }
 
         public string getShaderInfoLog(uint shader) {
-            StringBuilder builder = new StringBuilder();
+            int lenMax = 0;
+            Gl.GetShader(shader, ShaderParameterName.InfoLogLength, out lenMax);
+            StringBuilder builder = new StringBuilder(lenMax);
             int len = 0;
-            Gl.GetShaderInfoLog(shader, 1000, out len, builder);
-            return builder.ToString(0, len);
+            Gl.GetShaderInfoLog(shader, lenMax - 100, out len, builder);
+            return builder.ToString();
         }
 
         public void deleteShader(uint id) {
@@ -97,6 +106,10 @@ namespace tfc.program.util.gl {
 
         public void attachShader(uint program, uint shader) {
             Gl.AttachShader(program, shader);
+        }
+
+        public void detachShader(uint program, uint shader) {
+            Gl.DetachShader(program, shader);
         }
 
         public uint createProgram() {
@@ -146,8 +159,27 @@ namespace tfc.program.util.gl {
             Gl.Vertex2(x, y);
         }
 
+        public void vertexColor(double r, double g, double b) {
+            Gl.Color3(r, g, b);
+        }
+
+        public void vertexColor(double r, double g, double b, double a) {
+            Gl.Color4(r, g, b, a);
+        }
+
         public void validateProgram(uint id) {
             Gl.ValidateProgram(id);
+        }
+        
+        public int getShaderParameter(uint shader, ShaderParameterName param) {
+            int output = 0;
+            Gl.GetShader(shader, param, out output);
+            return output;
+        }
+
+        public bool getShaderParameterBool(uint shader, ShaderParameterName param) {
+            int val = getShaderParameter(shader, param);
+            return val != 0;
         }
     }
 }

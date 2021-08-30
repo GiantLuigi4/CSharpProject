@@ -22,61 +22,47 @@ namespace tfc.program {
                 mainWindow.show();
                 windows.add(mainWindow);
             }
-            Console.WriteLine("|-|Creating secondary window");
-            {
-                GLWindow secondWindow = new GLWindow();
-                {
-                    secondWindow.setTitle("Test1");
-                    secondWindow.show();
-                    windows.add(secondWindow);
-                }
-            }
             float[] vertices = {-0.5f,-0.5f,0f,
                 0.5f, -0.5f, 0f,
                 0f,0.5f,0f};
             int[] indices = { 0, 1, 2 };
-            VertexBufferObject vboVertices = new VertexBufferObject(mainWindow.getContext());
-            vboVertices.uploadVertices(vertices, 0, 3);
-            mainWindow.getContext().enableVertexAttribArray(0);
+            {
+                VertexBufferObject vboVerticesa = new VertexBufferObject(mainWindow.getContext());
+                vboVerticesa.uploadVertices(vertices, 0, 3);
+                mainWindow.getContext().enableVertexAttribArray(0);
+            }
 
-            /*Console.WriteLine("|Creating VAO");
-            VertexArrayObject vao = new VertexArrayObject(mainWindow.getContext());
-            vao.bind();
-            Console.WriteLine("|-|Creating VBOs");
-            VertexBufferObject vboVertices = new VertexBufferObject(mainWindow.getContext());
-            VertexBufferObject vboIndices = new VertexBufferObject(mainWindow.getContext());
-            Console.WriteLine("|-|Uploading VBOs");
-            vboVertices.uploadVertices(vertices, 0, 3);
-            vboIndices.uploadIndicies(indices);
-            mainWindow.getContext().enableVertexAttribArray(0);
-            vao.countIndices(vboIndices);
-            vao.unbind();*/
-
-            Console.WriteLine("|Creating Shader Program");
-            Console.WriteLine("|-|Creating shaders");
-            Console.WriteLine("|-|-|Vertex Shader");
             // TODO: asset pack type thing
-            util.rendering.Shader vertexShader = new util.rendering.Shader(ShaderType.VertexShader,
-                "#version 330 core\n" +
-                "in vec3 pos;\n" +
-                "void main() {\n" +
-                "   gl_Position = vec4(pos / 2., 1.0);\n" +
-                "}\0",
-                mainWindow.getContext()
-            );
-            Console.WriteLine("|-|-|Fragment Shader");
-            util.rendering.Shader fragmentShader = new util.rendering.Shader(ShaderType.FragmentShader,
-                "#version 330 core\n" +
-                "out vec4 FragColor;\n" +
-                "void main() {\n" +
-                "    FragColor = vec4(0.5, 0, 1, 1);\n" +
-                "}\0", 
-                mainWindow.getContext()
-            );
-            Console.WriteLine("|-|Link Shaders");
-            ShaderProgram program = new ShaderProgram(vertexShader, fragmentShader, mainWindow.getContext());
-            program.bindAttribute(0, "pos");
-            program.link();
+            ShaderHolder shaderHolderM;
+            {
+                mainWindow.grabGLContext();
+                Console.WriteLine("|Setup main window");
+                Console.WriteLine("|-|Creating Shader Program");
+                Console.WriteLine("|-|-|Creating shaders");
+                Console.WriteLine("|-|-|-|Vertex Shader");
+                util.rendering.Shader vertexShader = new util.rendering.Shader(ShaderType.VertexShader,
+                    "in vec3 pos;\n" +
+                    "void main() {\n" +
+                    "   gl_Position = vec4(pos / 2., 1.0);\n" +
+                    "}",
+                    mainWindow.getContext()
+                );
+                Console.WriteLine("|-|-|-|Fragment Shader");
+                util.rendering.Shader fragmentShader = new util.rendering.Shader(ShaderType.FragmentShader,
+                    "in vec4 color;\n" +
+                    "void main() {\n" +
+                    "    gl_FragColor = vec4(gl_FragCoord.xyz / 2., 1);\n" +
+                    "}",
+                    mainWindow.getContext()
+                );
+                Console.WriteLine("|-|-|Link Shaders");
+                ShaderProgram program = new ShaderProgram(vertexShader, fragmentShader, mainWindow.getContext());
+                program.bindAttribute(0, "pos");
+                program.bindAttribute(1, "color");
+                program.link();
+
+                shaderHolderM = new ShaderHolder(vertexShader, fragmentShader, program);
+            }
 
             Console.WriteLine("|Game Loop");
             while (mainWindow.isOpen()) {
@@ -94,28 +80,24 @@ namespace tfc.program {
                     GL.clearColor(cR, 0.0f, b, 0.0f);
                     GL.clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-                    program.start();
-                    if (b == 0) {
-                        b = 1;
+                    shaderHolderM.start();
 
-                        GL.begin(PrimitiveType.Triangles);
-                        GL.vertexPosition(0, 0, 0);
-                        GL.vertexPosition(1, 0, 0);
-                        GL.vertexPosition(1, 1, 0);
-                        GL.end();
-                    } else {
-                        GL.begin(PrimitiveType.Triangles);
-                        GL.vertexPosition(-1, -1, 0);
-                        GL.vertexPosition(1, -1, 0);
-                        GL.vertexPosition(0, 0, 0);
+                    GL.begin(PrimitiveType.Triangles);
+                    GL.vertexPosition(0, 0, 0);
+                    GL.vertexPosition(1, 0, 0);
+                    GL.vertexPosition(1, 1, 0);
 
-                        GL.vertexPosition(0, 0, 0);
-                        GL.vertexPosition(1, 0, 0);
-                        GL.vertexPosition(1, -1, 0);
-                        GL.end();
-                    }
-                    program.end();
+                    GL.vertexPosition(-1, -1, 0);
+                    GL.vertexPosition(1, -1, 0);
+                    GL.vertexPosition(0, 0, 0);
 
+                    GL.vertexPosition(0, 0, 0);
+                    GL.vertexPosition(1, 0, 0);
+                    GL.vertexPosition(1, -1, 0);
+
+                    GL.end();
+
+                    shaderHolderM.end();
 
                     // window.getBounds();
                     window.update();
@@ -134,12 +116,11 @@ namespace tfc.program {
             vboIndices.Dispose();
             vao.Dispose();*/
 
-            Console.WriteLine("|-|Deleting Shaders");
-            vertexShader.delete();
-            fragmentShader.delete();
+            Console.WriteLine("|-|Cleaning up main window");
+            mainWindow.grabGLContext();
 
-            Console.WriteLine("|-|Deleting Shader Program");
-            program.delete();
+            Console.WriteLine("|-|-|Deleting Shaders and Shader Programs");
+            shaderHolderM.delete();
         }
     }
 }
