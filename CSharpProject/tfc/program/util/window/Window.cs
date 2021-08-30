@@ -114,5 +114,15 @@ namespace tfc.program.util.window {
 		public void setCloseListener(GLFWwindowclosefun listener) {
 			GLFW.setCloseCallback(handle, listener);
 		}
-	}
+
+        public int getWidth() {
+			Pair<int, int> size = GLFW.getWindowSize(handle);
+			return size.getFirst();
+        }
+
+        public int getHeight() {
+			Pair<int, int> size = GLFW.getWindowSize(handle);
+			return size.getSecond();
+        }
+    }
 }

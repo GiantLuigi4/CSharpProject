@@ -22,52 +22,71 @@ namespace tfc.program {
                 mainWindow.show();
                 windows.add(mainWindow);
             }
-            float[] vertices = {-0.5f,-0.5f,0f,
-                0.5f, -0.5f, 0f,
-                0f,0.5f,0f};
-            int[] indices = { 0, 1, 2 };
-            {
-                VertexBufferObject vboVerticesa = new VertexBufferObject(mainWindow.getContext());
-                vboVerticesa.uploadVertices(vertices, 0, 3);
-                mainWindow.getContext().enableVertexAttribArray(0);
-            }
-
+            Gl.VertexAttribPointer(0, 3, VertexAttribType.Float, false, 3 * sizeof(float), 0);
+            Gl.VertexAttribPointer(3, 4, VertexAttribType.Float, false, 4 * sizeof(float), 0);
+            Gl.EnableVertexAttribArray(0);
+            Gl.EnableVertexAttribArray(3);
             // TODO: asset pack type thing
             ShaderHolder shaderHolderM;
             {
                 mainWindow.grabGLContext();
+                /*{
+                    VertexBufferObject vboVerticesa = new VertexBufferObject(mainWindow.getContext());
+                    vboVerticesa.uploadVertices(vertices, 0, 3);
+                    mainWindow.getContext().enableVertexAttribArray(0);
+                }*/
                 Console.WriteLine("|Setup main window");
                 Console.WriteLine("|-|Creating Shader Program");
                 Console.WriteLine("|-|-|Creating shaders");
                 Console.WriteLine("|-|-|-|Vertex Shader");
-                util.rendering.Shader vertexShader = new util.rendering.Shader(ShaderType.VertexShader,
-                    "in vec3 pos;\n" +
-                    "void main() {\n" +
-                    "   gl_Position = vec4(pos / 2., 1.0);\n" +
-                    "}",
-                    mainWindow.getContext()
-                );
+                util.rendering.Shader vertexShader = new Shader(ShaderType.VertexShader, "in vec3 position;varying vec2 surfacePosition;uniform vec2 start;uniform vec2 resolution;void main(){gl_Position=vec4(position,1.0);float x=sign(position.x);x-=start.x;float y=sign(position.y);y-=start.y;float maxRes=min(resolution.x,resolution.y)/max(resolution.x,resolution.y);/*TODO:figure out how to remove this branching*/if(resolution.x<resolution.y){surfacePosition=vec2(x,y/maxRes);}else{surfacePosition=vec2(x/maxRes,y);}}",  mainWindow.getContext());
                 Console.WriteLine("|-|-|-|Fragment Shader");
-                util.rendering.Shader fragmentShader = new util.rendering.Shader(ShaderType.FragmentShader,
-                    "in vec4 color;\n" +
+                util.rendering.Shader fragmentShader = new Shader(ShaderType.FragmentShader,
+                    "in vec3 color;\n" +
+                    "in vec2 surfacePosition;\n" +
                     "void main() {\n" +
-                    "    gl_FragColor = vec4(gl_FragCoord.xyz / 2., 1);\n" +
+                    "   gl_FragColor = vec4(0.16862745098, 0.16862745098, 0.16862745098, 1);\n" +
+                    "   gl_FragColor = color;\n" +
                     "}",
                     mainWindow.getContext()
                 );
                 Console.WriteLine("|-|-|Link Shaders");
                 ShaderProgram program = new ShaderProgram(vertexShader, fragmentShader, mainWindow.getContext());
                 program.bindAttribute(0, "pos");
-                program.bindAttribute(1, "color");
+                program.bindAttribute(3, "col");
                 program.link();
+                program.getUniformLocation("start");
+                program.getUniformLocation("resolution");
 
                 shaderHolderM = new ShaderHolder(vertexShader, fragmentShader, program);
+            }
+
+            uint buffer;
+            {
+                mainWindow.grabGLContext();
+                OpenGLW GL = mainWindow.getContext();
+                buffer = GL.genBuffers();
+                GL.bindBuffer(BufferTarget.ArrayBuffer, buffer);
+                GL.bufferData(BufferTarget.ArrayBuffer, new float[]{
+                    -1.0f, -1.0f,  0.0f,     1.0F, 0.0F, 0.0F, 1.0F,
+                     1.0f, -1.0f,  0.0f,     0.0F, 0.0F, 0.0F, 1.0F,
+                    -1.0f,  1.0f,  0.0f,     0.0F, 0.0F, 1.0F, 1.0F,
+                     1.0f, -1.0f,  0.0f,     0.0F, 1.0F, 0.0F, 1.0F,
+                     1.0f,  1.0f,  0.0f,     0.0F, 1.0F, 1.0F, 1.0F,
+                    -1.0f,  1.0f,  0.0f,     1.0F, 1.0F, 0.0F, 0.0F
+                }, BufferUsage.StaticDraw);
+
+                Gl.VertexAttribPointer(0, 3, VertexAttribType.Float, false, 3 * sizeof(float), 0);
+                Gl.VertexAttribPointer(3, 4, VertexAttribType.Float, false, 4 * sizeof(float), 0);
+                Gl.EnableVertexAttribArray(0);
+                Gl.EnableVertexAttribArray(3);
+
+                GL.bindBuffer(BufferTarget.ArrayBuffer, 0);
             }
 
             Console.WriteLine("|Game Loop");
             while (mainWindow.isOpen()) {
                 cR += 1f / (255f * 2f);
-                int b = 0;
 
                 if (cR >= 1) {
                     cR = 0;
@@ -77,24 +96,30 @@ namespace tfc.program {
                     window.grabGLContext();
 
                     OpenGLW GL = window.getContext();
-                    GL.clearColor(cR, 0.0f, b, 0.0f);
+                    GL.clearColor(cR, 0.0f, 0, 0.0f);
                     GL.clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
                     shaderHolderM.start();
+                    int width = window.getWidth();
+                    int height = window.getHeight();
+                    shaderHolderM.program.setUniform("start", -1, -1);
+                    shaderHolderM.program.setUniform("resolution", (float)Math.Min(width, height), (float)Math.Min(width, height));
 
-                    GL.begin(PrimitiveType.Triangles);
-                    GL.vertexPosition(0, 0, 0);
-                    GL.vertexPosition(1, 0, 0);
-                    GL.vertexPosition(1, 1, 0);
+                    GL.bindBuffer(BufferTarget.ArrayBuffer, buffer);
+                    GL.drawArrays(PrimitiveType.Triangles, 0, 6);
+                    GL.bindBuffer(BufferTarget.ArrayBuffer, 0);
 
+                    GL.begin(PrimitiveType.Quads);
+                    float x = (width / 2) - width / 4;
                     GL.vertexPosition(-1, -1, 0);
-                    GL.vertexPosition(1, -1, 0);
-                    GL.vertexPosition(0, 0, 0);
-
-                    GL.vertexPosition(0, 0, 0);
-                    GL.vertexPosition(1, 0, 0);
-                    GL.vertexPosition(1, -1, 0);
-
+                    GL.vertexColor(0, 0, 0, 1);
+//                    GL.vertexPosition(0.6 - 1, -1, 0);
+                    GL.vertexPosition(0.6 - 1, -1, 0);
+                    GL.vertexColor(1, 0, 0, 1);
+                    GL.vertexPosition(0.6 - 1, 0.3 - 1, 0);
+                    GL.vertexColor(1, 1, 0, 1);
+                    GL.vertexPosition(-1, 0.3 -1, 0);
+                    GL.vertexColor(0, 1, 0, 1);
                     GL.end();
 
                     shaderHolderM.end();

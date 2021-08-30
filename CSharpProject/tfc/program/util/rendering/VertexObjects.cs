@@ -77,10 +77,9 @@ namespace tfc.program.util.rendering {
 		}
 
 		// TODO: figure out if there's an enum I can replace attribute with
-		public void uploadVertices(float[] vertices, uint attribute, int dimensions) {
+		public void uploadVertices(float[] vertices, int dimensions) {
 			graphicsLibrary.bindBuffer(BufferTarget.ArrayBuffer, id);
 			graphicsLibrary.bufferData(BufferTarget.ArrayBuffer, vertices, BufferUsage.StaticDraw);
-			graphicsLibrary.vertexAttributePointer(attribute, dimensions, VertexAttribType.Float, false, 3 * sizeof(float), 0);
 //			graphicsLibrary.bindBuffer(GLEnum.ArrayBuffer, 0);
 			size = vertices.Length / dimensions;
 		}

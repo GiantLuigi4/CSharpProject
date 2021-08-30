@@ -96,7 +96,7 @@ namespace tfc.program.util.gl {
             Gl.GetShader(shader, ShaderParameterName.InfoLogLength, out lenMax);
             StringBuilder builder = new StringBuilder(lenMax);
             int len = 0;
-            Gl.GetShaderInfoLog(shader, lenMax - 100, out len, builder);
+            Gl.GetShaderInfoLog(shader, lenMax, out len, builder);
             return builder.ToString();
         }
 
@@ -180,6 +180,18 @@ namespace tfc.program.util.gl {
         public bool getShaderParameterBool(uint shader, ShaderParameterName param) {
             int val = getShaderParameter(shader, param);
             return val != 0;
+        }
+
+        public int getUniformLocation(uint id, string name) {
+            return Gl.GetUniformLocation(id, name);
+        }
+
+        public void uniform2(int location, float val0, float val1) {
+            Gl.Uniform2(location, val0, val1);
+        }
+
+        public void viewport(int x, int y, int width, int height) {
+            Gl.Viewport(x, y, width, height);
         }
     }
 }
