@@ -37,6 +37,7 @@ namespace tfc.program {
             int[] indices = { 0, 1, 2 };
             VertexBufferObject vboVertices = new VertexBufferObject(mainWindow.getContext());
             vboVertices.uploadVertices(vertices, 0, 3);
+            mainWindow.getContext().enableVertexAttribArray(0);
 
             /*Console.WriteLine("|Creating VAO");
             VertexArrayObject vao = new VertexArrayObject(mainWindow.getContext());
@@ -59,7 +60,7 @@ namespace tfc.program {
                 "#version 330 core\n" +
                 "in vec3 pos;\n" +
                 "void main() {\n" +
-                "   gl_Position = vec4(pos, 1.0);\n" +
+                "   gl_Position = vec4(pos / 2., 1.0);\n" +
                 "}\0",
                 mainWindow.getContext()
             );
@@ -68,13 +69,14 @@ namespace tfc.program {
                 "#version 330 core\n" +
                 "out vec4 FragColor;\n" +
                 "void main() {\n" +
-                "    FragColor = vec4(1);\n" +
+                "    FragColor = vec4(0.5, 0, 1, 1);\n" +
                 "}\0", 
                 mainWindow.getContext()
             );
             Console.WriteLine("|-|Link Shaders");
             ShaderProgram program = new ShaderProgram(vertexShader, fragmentShader, mainWindow.getContext());
             program.bindAttribute(0, "pos");
+            program.link();
 
             Console.WriteLine("|Game Loop");
             while (mainWindow.isOpen()) {
@@ -92,6 +94,7 @@ namespace tfc.program {
                     GL.clearColor(cR, 0.0f, b, 0.0f);
                     GL.clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
+                    program.start();
                     if (b == 0) {
                         b = 1;
 
@@ -100,23 +103,21 @@ namespace tfc.program {
                         GL.vertexPosition(1, 0, 0);
                         GL.vertexPosition(1, 1, 0);
                         GL.end();
-
-                        /*program.use();
-                        vao.bind();
-                        GL.bindBuffer(BufferTarget.ArrayBuffer, vboVertices.getId());
-                        GL.drawArrays(PrimitiveType.Triangles, 0, 3);
-                        GL.bindBuffer(BufferTarget.ArrayBuffer, 0);
-                        vao.unbind();
-                        program.end();*/
                     } else {
                         GL.begin(PrimitiveType.Triangles);
                         GL.vertexPosition(-1, -1, 0);
-                        GL.vertexPosition(0, -1, 0);
+                        GL.vertexPosition(1, -1, 0);
                         GL.vertexPosition(0, 0, 0);
+
+                        GL.vertexPosition(0, 0, 0);
+                        GL.vertexPosition(1, 0, 0);
+                        GL.vertexPosition(1, -1, 0);
                         GL.end();
                     }
+                    program.end();
 
-//                    window.getBounds();
+
+                    // window.getBounds();
                     window.update();
                     GLFW.pollEvents();
                 }

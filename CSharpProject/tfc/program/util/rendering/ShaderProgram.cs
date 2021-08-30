@@ -14,12 +14,9 @@ namespace tfc.program.util.rendering {
             id = gl.createProgram();
             gl.attachShader(id, vertex.getID());
             gl.attachShader(id, fragment.getID());
-            gl.linkProgram(id);
-            string log = gl.getProgramInfoLog(id);
-            if (!log.Equals("")) Console.WriteLine(log);
         }
 
-        public void use() {
+        public void start() {
             GL.useProgram(id);
         }
 
@@ -33,6 +30,13 @@ namespace tfc.program.util.rendering {
 
         public void bindAttribute(uint index, string name) {
             GL.bindAttribute(id, index, name);
+        }
+
+        public void link() {
+            GL.linkProgram(id);
+            GL.validateProgram(id);
+            string log = GL.getProgramInfoLog(id);
+            if (!log.Equals("")) Console.WriteLine(log);
         }
     }
 }

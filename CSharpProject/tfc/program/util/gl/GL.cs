@@ -145,5 +145,9 @@ namespace tfc.program.util.gl {
         public void vertexPosition(double x, double y) {
             Gl.Vertex2(x, y);
         }
+
+        public void validateProgram(uint id) {
+            Gl.ValidateProgram(id);
+        }
     }
 }
